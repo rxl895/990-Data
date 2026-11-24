@@ -14,6 +14,7 @@ Run:
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -1520,6 +1521,20 @@ def tab_browse(files, filters, bmf_exists):
 # Main
 # ---------------------------------------------------------------------------
 
+@st.cache_resource(show_spinner="Downloading NCCS 990 dataset from Hugging Face (first boot only)…")
+def ensure_hf_data(repo_id: str) -> None:
+    """Download Parquet files from a Hugging Face Dataset repo into DATA_DIR."""
+    from huggingface_hub import snapshot_download
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    snapshot_download(
+        repo_id=repo_id,
+        repo_type="dataset",
+        local_dir=str(DATA_DIR),
+        allow_patterns=["*.parquet"],
+    )
+
+
 def main():
     st.set_page_config(
         page_title="NCCS 990 Explorer",
@@ -1538,6 +1553,13 @@ def main():
     soi_files    = sorted(DATA_DIR.glob("irs_soi_*.parquet")) if DATA_DIR.exists() else []
     legacy_files = sorted(DATA_DIR.glob("legacy_*.parquet")) if DATA_DIR.exists() else []
     all_files    = soi_files + legacy_files
+
+    hf_dataset_repo = os.environ.get("HF_DATASET_REPO", "").strip()
+    if not all_files and hf_dataset_repo:
+        ensure_hf_data(hf_dataset_repo)
+        soi_files    = sorted(DATA_DIR.glob("irs_soi_*.parquet")) if DATA_DIR.exists() else []
+        legacy_files = sorted(DATA_DIR.glob("legacy_*.parquet")) if DATA_DIR.exists() else []
+        all_files    = soi_files + legacy_files
 
     if not all_files:
         st.error("⚠️ No data files found in `./data/`.")
