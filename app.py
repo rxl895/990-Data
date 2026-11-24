@@ -1555,6 +1555,11 @@ def main():
     all_files    = soi_files + legacy_files
 
     hf_dataset_repo = os.environ.get("HF_DATASET_REPO", "").strip()
+    if not hf_dataset_repo:
+        try:
+            hf_dataset_repo = str(st.secrets.get("HF_DATASET_REPO", "")).strip()
+        except Exception:
+            hf_dataset_repo = ""
     if not all_files and hf_dataset_repo:
         ensure_hf_data(hf_dataset_repo)
         soi_files    = sorted(DATA_DIR.glob("irs_soi_*.parquet")) if DATA_DIR.exists() else []
