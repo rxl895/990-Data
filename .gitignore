@@ -1,0 +1,31 @@
+# Data files (too large for git — download with irs_soi_downloader.py)
+data/
+*.parquet
+*.duckdb
+*.duckdb.wal
+
+# Logs
+download.log
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
